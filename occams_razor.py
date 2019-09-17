@@ -354,9 +354,9 @@ def build_report(df, classifier, x_data, y_data, random_state=42, threshold=.5, 
 
 # Initialize starting conditions
 random_state = 42
-n = 10
+n = 1
 
-data = '/home/data/reduced_classification_features.csv'
+data = '~/ImageVolumes/Jupyter/data/reduced_classification_features.csv'
 data = pd.read_csv(data)
 
 data = upsample_minority_class(data, random_state)
