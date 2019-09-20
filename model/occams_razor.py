@@ -18,21 +18,26 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from xgboost import XGBClassifier
+from io import StringIO
+import boto3
 
 import pandas_profiling
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn import metrics
-from sklearn.metrics import confusion_matrix
-import pickle
+# from sklearn.metrics import confusion_matrix
+# import pickle
 from sklearn import preprocessing
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-import graphviz
+# import graphviz
 from sklearn import tree
+import os
 
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.max_rows', 2500)
 pd.set_option('display.float_format', '{:.3f}'.format)
 pd.set_option('display.max_colwidth', -1)
+
+S3_URI = os.environ.get('S3_URI', None)
 
 # ################################################################
 
@@ -350,14 +355,25 @@ def build_report(df, classifier, x_data, y_data, random_state=42, threshold=.5, 
     return df
 
 # ################################################################
+def get_data(path):
+    file_list = os.listdir(path)
+    filepath = str(file_list[0])
+    return filepath
+
+# ################################################################
 # Calling the functions
+# data = get_data('/opt/ml/s3-drive/test1')
 
 # Initialize starting conditions
 random_state = 42
 n = 1
 
-data = '~/ImageVolumes/Jupyter/data/reduced_classification_features.csv'
-data = pd.read_csv(data)
+split = S3_URI.split('/')
+bucket = split[2]
+key = split[3:]
+key = ('/'.join(key))+'.out'
+
+data = pd.read_csv(str("/opt/ml/data/data.csv"))
 
 data = upsample_minority_class(data, random_state)
 x_data = data.iloc[:, 0:-1]
@@ -370,5 +386,9 @@ for classifier in classifier_list:
 
 df.sort_values('F1-Score', axis=0, ascending=False, inplace=True, kind='quicksort', na_position='last')
 df.reset_index(level=None, drop=True, inplace=True, col_level=0, col_fill='')
-result = df.to_csv('output.csv')
+
+csv_buffer = StringIO()
+df.to_csv(csv_buffer)
+s3_resource = boto3.resource('s3')
+s3_resource.Object(bucket, key).put(Body=csv_buffer.getvalue())
 print('fin')
