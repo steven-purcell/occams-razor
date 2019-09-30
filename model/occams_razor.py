@@ -20,15 +20,11 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticD
 from xgboost import XGBClassifier
 from io import StringIO
 import boto3
-
 import pandas_profiling
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn import metrics
-# from sklearn.metrics import confusion_matrix
-# import pickle
 from sklearn import preprocessing
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-# import graphviz
 from sklearn import tree
 import os
 
@@ -362,7 +358,7 @@ def get_data(path):
 
 # ################################################################
 # Calling the functions
-# data = get_data('/opt/ml/s3-drive/test1')
+
 
 # Initialize starting conditions
 random_state = 42
